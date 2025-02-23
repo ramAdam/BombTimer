@@ -14,4 +14,4 @@ var initialSeconds = 20;
 var todayIsChristmas = true;
 ```
 
-Modify these varibles in Bomb.html
+Modify these variable in Bomb.html
