@@ -1,0 +1,40 @@
+# Maintainer: Your Name <your.email@example.com>
+
+pkgname=bomb-timer
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="CS:GO style bomb timer"
+arch=('x86_64')
+url="https://github.com/yourusername/bomb_timer"
+license=('MIT')
+depends=('gtk3' 'libglvnd')  # Changed libgtk-3 to gtk3
+options=(!strip)
+
+package() {
+  # Create directories
+  mkdir -p "$pkgdir/usr/bin"
+  mkdir -p "$pkgdir/usr/share/applications"
+  mkdir -p "$pkgdir/opt/bomb_timer"
+  
+  # Copy application files
+  cp -r "$startdir/build/linux/x64/release/bundle/"* "$pkgdir/opt/bomb_timer/"
+  
+  # Create launcher script
+  cat > "$pkgdir/usr/bin/bomb-timer" << EOF
+#!/bin/bash
+exec /opt/bomb_timer/bomb_timer "\$@"
+EOF
+  chmod +x "$pkgdir/usr/bin/bomb-timer"
+  
+  # Create desktop entry
+  cat > "$pkgdir/usr/share/applications/bomb-timer.desktop" << EOF
+[Desktop Entry]
+Name=Bomb Timer
+Comment=CS:GO style bomb timer
+Exec=/usr/bin/bomb-timer
+Icon=/opt/bomb_timer/data/flutter_assets/assets/images/bomb.png
+Terminal=false
+Type=Application
+Categories=Utility;
+EOF
+}

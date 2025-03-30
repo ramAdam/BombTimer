@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Package build related
+*.pkg.tar.zst
+*.pkg.tar.xz
+/pkg/
+/src/
+/PKGBUILD.bak
+
+# Generated during makepkg
+/.SRCINFO
+/.PKGINFO
+/.BUILDINFO
