@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:gif_view/gif_view.dart';
 
 void main() {
   runApp(const BombTimerApp());
@@ -29,6 +30,7 @@ class BombTimer extends StatefulWidget {
 }
 
 class _BombTimerState extends State<BombTimer> {
+  Key _explosionGifKey = UniqueKey();
   int minutes = 0;
   int seconds = 20;
   bool todayIsChristmas = true;
@@ -129,6 +131,7 @@ class _BombTimerState extends State<BombTimer> {
       seconds = 20;
       showTimer = true;
       flashCount = 0;
+      _explosionGifKey = UniqueKey();
     });
 
     // Optional: play a reset sound
@@ -184,23 +187,28 @@ class _BombTimerState extends State<BombTimer> {
                     Positioned(
                       top: -910,
                       left: 0,
-                      child: Image.asset(
+                      child: GifView.asset(
                         'assets/images/explosion2.gif',
                         width: 2075,
+                        key: _explosionGifKey,
+                        loop: false,
+                        onFinish: () {
+                          print('Explosion finished');
+                        },
                       ),
                     ),
 
                   // Timer background
                   if (!gameOver) // FIXED: Show when game is NOT over
                     Positioned(
-                      right: 260,
-                      top: 136,
+                      right: 170,
+                      top: 120,
                       child: Text(
                         '00:00',
                         style: TextStyle(
                           fontFamily: 'digital_7_mono',
                           fontSize: 40,
-                          color: Colors.red.withOpacity(0.2),
+                          color: Colors.red.withOpacity(.1),
                         ),
                       ),
                     ),
@@ -209,8 +217,8 @@ class _BombTimerState extends State<BombTimer> {
                   if (!gameOver &&
                       showTimer) // FIXED: Only show when game is active and timer should be visible
                     Positioned(
-                      right: 260,
-                      top: 136,
+                      right: 170,
+                      top: 120,
                       child: Text(
                         timerText,
                         style: const TextStyle(
