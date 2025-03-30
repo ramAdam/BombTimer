@@ -184,17 +184,24 @@ class _BombTimerState extends State<BombTimer> {
                     ),
                   // Explosion - show when game over
                   if (gameOver)
-                    Positioned(
-                      top: -910,
-                      left: 0,
-                      child: GifView.asset(
-                        'assets/images/explosion2.gif',
-                        width: 2075,
-                        key: _explosionGifKey,
-                        loop: false,
-                        onFinish: () {
-                          print('Explosion finished');
-                        },
+                    Positioned.fill(
+                      child: Center(
+                        child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          alignment: Alignment.center,
+                          child: GifView.asset(
+                            'assets/images/explosion2.gif',
+                            width: 2400, // Increase size
+                            height: 2400, // Add height for better scaling
+                            fit: BoxFit.cover,
+                            key: _explosionGifKey,
+                            loop: false,
+                            onFinish: () {
+                              print('Explosion finished');
+                            },
+                          ),
+                        ),
                       ),
                     ),
 
