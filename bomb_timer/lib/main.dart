@@ -1,3 +1,4 @@
+import 'package:bomb_timer/widgets/timer_settings_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
@@ -55,8 +56,6 @@ class _BombTimerState extends State<BombTimer> {
 
   void startTimer() {
     setState(() {
-      minutes = 0;
-      seconds = 20;
       flashCount = 3;
     });
 
@@ -112,7 +111,7 @@ class _BombTimerState extends State<BombTimer> {
     playAudio('explode.wav');
 
     // Auto-reset after explosion finishes (5 seconds)
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted && gameOver) {
         // Check if widget is still mounted and game is over
         resetGame();
@@ -138,10 +137,56 @@ class _BombTimerState extends State<BombTimer> {
     playAudio('armbomb.wav');
   }
 
+  void showSettings() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: TimerSettings(
+          initialMinutes: minutes,
+          initialSeconds: seconds,
+          christmasTheme: todayIsChristmas,
+          onSave: (mins, secs, christmas) {
+            setState(() {
+              minutes = mins;
+              seconds = secs;
+              todayIsChristmas = christmas;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   String get timerText {
     String minutesStr = minutes < 10 ? '0$minutes' : '$minutes';
     String secondsStr = seconds < 10 ? '0$seconds' : '$seconds';
     return '$minutesStr:$secondsStr';
+  }
+
+  void setTimerPreset(int mins, int secs) {
+    setState(() {
+      minutes = mins;
+      seconds = secs;
+      showTimer = true;
+      gameOver = false;
+    });
+
+    startTimer();
+
+    // Show a quick message to confirm the change
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Timer set to ${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red.withOpacity(0.8),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -157,6 +202,20 @@ class _BombTimerState extends State<BombTimer> {
               return KeyEventResult.handled;
             } else if (event.logicalKey == LogicalKeyboardKey.space) {
               startTimer();
+              return KeyEventResult.handled;
+            }
+            // Add preset timer hotkeys
+            else if (event.logicalKey == LogicalKeyboardKey.digit1 ||
+                event.logicalKey == LogicalKeyboardKey.numpad1) {
+              setTimerPreset(60, 0); // 60 minutes
+              return KeyEventResult.handled;
+            } else if (event.logicalKey == LogicalKeyboardKey.digit2 ||
+                event.logicalKey == LogicalKeyboardKey.numpad2) {
+              setTimerPreset(20, 0); // 20 minutes
+              return KeyEventResult.handled;
+            } else if (event.logicalKey == LogicalKeyboardKey.digit3 ||
+                event.logicalKey == LogicalKeyboardKey.numpad3) {
+              setTimerPreset(0, 30); // 30 seconds
               return KeyEventResult.handled;
             }
           }
@@ -180,6 +239,20 @@ class _BombTimerState extends State<BombTimer> {
                             ? 'assets/images/bomb_christmas.png'
                             : 'assets/images/bomb.png',
                         width: 380,
+                      ),
+                    ),
+                  // Settings button
+                  if (!gameOver)
+                    Positioned(
+                      top: 20,
+                      right: 0, // Position to the left of the bomb
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.settings,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                        onPressed: showSettings,
                       ),
                     ),
                   // Explosion - show when game over
