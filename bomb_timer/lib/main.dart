@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 
+import 'package:flutter/services.dart';
+
 void main() {
   runApp(const BombTimerApp());
 }
@@ -107,19 +109,30 @@ class _BombTimerState extends State<BombTimer> {
     });
     playAudio('explode.wav');
 
-    // Auto-reset after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      resetGame();
+    // Auto-reset after explosion finishes (5 seconds)
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && gameOver) {
+        // Check if widget is still mounted and game is over
+        resetGame();
+      }
     });
   }
 
   void resetGame() {
+    // Cancel any existing timers
+    timer?.cancel();
+    flashTimer?.cancel();
+
     setState(() {
       gameOver = false;
       minutes = 0;
       seconds = 20;
       showTimer = true;
+      flashCount = 0;
     });
+
+    // Optional: play a reset sound
+    playAudio('armbomb.wav');
   }
 
   String get timerText {
@@ -132,74 +145,89 @@ class _BombTimerState extends State<BombTimer> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF282828),
-      body: Center(
-        child: SizedBox(
-          width: 1920,
-          height: 1080,
-          child: GestureDetector(
-            onTap: () => startTimer(),
-            child: Stack(
-              children: [
-                // Bomb image
-                if (!gameOver)
-                  Positioned(
-                    right: 20, // Adjust based on your needs
-                    top: 20,
-                    child: Image.asset(
-                      todayIsChristmas
-                          ? 'assets/images/bomb_christmas.png'
-                          : 'assets/images/bomb.png',
-                      width: 380,
-                    ),
-                  ),
-                // Explosion - show when game over
-                if (gameOver)
-                  Positioned(
-                    top: -910,
-                    left: 0,
-                    child: Image.asset(
-                      'assets/images/explosion2.gif',
-                      width: 2075,
-                    ),
-                  ),
-
-                // Timer background
-                if (!gameOver) // FIXED: Show when game is NOT over
-                  Positioned(
-                    right: 260,
-                    top: 136,
-                    child: Text(
-                      '00:00',
-                      style: TextStyle(
-                        fontFamily: 'digital_7_mono',
-                        fontSize: 40,
-                        color: Colors.red.withOpacity(0.2),
+      body: Focus(
+        autofocus: true,
+        onKeyEvent: (node, event) {
+          if (event is KeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.keyR) {
+              resetGame();
+              return KeyEventResult.handled;
+            } else if (event.logicalKey == LogicalKeyboardKey.space) {
+              startTimer();
+              return KeyEventResult.handled;
+            }
+          }
+          return KeyEventResult.ignored;
+        },
+        child: Center(
+          child: SizedBox(
+            width: 1920,
+            height: 1080,
+            child: GestureDetector(
+              onTap: () => gameOver ? resetGame() : startTimer(),
+              child: Stack(
+                children: [
+                  // Bomb image
+                  if (!gameOver)
+                    Positioned(
+                      right: 20, // Adjust based on your needs
+                      top: 20,
+                      child: Image.asset(
+                        todayIsChristmas
+                            ? 'assets/images/bomb_christmas.png'
+                            : 'assets/images/bomb.png',
+                        width: 380,
                       ),
                     ),
-                  ),
-
-                // Active timer
-                if (!gameOver &&
-                    showTimer) // FIXED: Only show when game is active and timer should be visible
-                  Positioned(
-                    right: 260,
-                    top: 136,
-                    child: Text(
-                      timerText,
-                      style: const TextStyle(
-                        fontFamily: 'digital_7_mono',
-                        fontSize: 40,
-                        color: Colors.red,
-                        shadows: [
-                          Shadow(
-                            color: Colors.red,
-                            blurRadius: 2,
-                          ),
-                        ],
+                  // Explosion - show when game over
+                  if (gameOver)
+                    Positioned(
+                      top: -910,
+                      left: 0,
+                      child: Image.asset(
+                        'assets/images/explosion2.gif',
+                        width: 2075,
                       ),
                     ),
-                  ),
-              ],
+
+                  // Timer background
+                  if (!gameOver) // FIXED: Show when game is NOT over
+                    Positioned(
+                      right: 260,
+                      top: 136,
+                      child: Text(
+                        '00:00',
+                        style: TextStyle(
+                          fontFamily: 'digital_7_mono',
+                          fontSize: 40,
+                          color: Colors.red.withOpacity(0.2),
+                        ),
+                      ),
+                    ),
+
+                  // Active timer
+                  if (!gameOver &&
+                      showTimer) // FIXED: Only show when game is active and timer should be visible
+                    Positioned(
+                      right: 260,
+                      top: 136,
+                      child: Text(
+                        timerText,
+                        style: const TextStyle(
+                          fontFamily: 'digital_7_mono',
+                          fontSize: 40,
+                          color: Colors.red,
+                          shadows: [
+                            Shadow(
+                              color: Colors.red,
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
