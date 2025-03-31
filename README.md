@@ -1,6 +1,6 @@
 # bomb_timer
 
-![Bomb Timer Logo](assets/images/bomb_christmas.png)
+![Bomb Timer Logo](bomb_timer/assets/images/screenshot.jpg)
 
 ### About
 
