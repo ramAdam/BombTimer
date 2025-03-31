@@ -1,16 +1,40 @@
 # bomb_timer
 
-A new Flutter project.
+![Bomb Timer Logo](assets/images/bomb_christmas.png)
 
-## Getting Started
+### Build and Installation Instructions
 
-This project is a starting point for a Flutter application.
+To build and install the application for Linux, follow these steps:
 
-A few resources to get you started if this is your first Flutter project:
+1. Ensure you have Flutter installed and set up for Linux development.
+2. Run the provided `update.sh` script to build and install the application:
+   ```bash
+   ./update.sh
+   ```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This script will:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Rebuild the Flutter app in release mode.
+- Increment the release number in the `PKGBUILD` file.
+- Build and install the package using `makepkg`.
+
+### Running the Application
+
+After installation, you can run the application by executing the binary from its installation directory or using the desktop entry if one is created.
+
+### In-App Hotkeys
+
+- **Start Timer**: `1` for an hour timer
+- **Pause Timer**: `2`
+- **Reset Timer**: `R` reset timer
+- **Exit Application**: `Ctrl + Q` not implemented yet
+
+## Local Linux-dev
+
+- **flutter run -d linux**
+
+### Notes
+
+- Ensure all dependencies required by `makepkg` are installed on your system.
+- For more details on Flutter setup for Linux, refer to the [Flutter documentation](https://docs.flutter.dev/get-started/install/linux).
+- Modify the `update.sh` script as needed for your specific environment.
