@@ -1,9 +1,10 @@
 // bomb_timer_controller.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 
-class BombTimerController {
+class BombTimerController extends ChangeNotifier {
   // State variables
   Key explosionGifKey = UniqueKey();
   int minutes = 0;
@@ -17,11 +18,6 @@ class BombTimerController {
   Timer? _timer;
   Timer? _flashTimer;
   final AudioPlayer _audioPlayer = AudioPlayer();
-
-  // Callback for widget to rebuild
-  final Function() onStateChanged;
-
-  BombTimerController({required this.onStateChanged});
 
   // Get formatted timer text
   String get timerText {
@@ -42,7 +38,7 @@ class BombTimerController {
         const Duration(milliseconds: 50), (_) => _flashTimerDisplay());
 
     _playAudio('armbomb.wav');
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Reset the game to initial state
@@ -58,7 +54,7 @@ class BombTimerController {
     explosionGifKey = UniqueKey();
 
     _playAudio('armbomb.wav');
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Timer tick implementation
@@ -83,14 +79,14 @@ class BombTimerController {
       _playAudio('beep.wav');
     }
 
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Handle explosion
   void _terroristsWin() {
     gameOver = true;
     _playAudio('explode.wav');
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
 
     // Auto-reset after 5 seconds
     Future.delayed(const Duration(seconds: 5), () {
@@ -109,7 +105,7 @@ class BombTimerController {
       _flashTimer?.cancel();
     }
 
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Set timer to specific values
@@ -118,13 +114,13 @@ class BombTimerController {
     seconds = secs;
     showTimer = true;
     gameOver = false;
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Update Christmas theme
   void setChristmasTheme(bool enabled) {
     todayIsChristmas = enabled;
-    onStateChanged();
+    notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
   // Play audio helper
@@ -133,9 +129,11 @@ class BombTimerController {
   }
 
   // Clean up resources
+  @override
   void dispose() {
     _timer?.cancel();
     _flashTimer?.cancel();
     _audioPlayer.dispose();
+    super.dispose(); // Add this to call ChangeNotifier.dispose()
   }
 }

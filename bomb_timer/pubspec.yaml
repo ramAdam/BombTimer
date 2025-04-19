@@ -37,6 +37,7 @@ dependencies:
   audioplayers: ^5.0.0
   google_fonts: ^4.0.4
   gif_view: ^1.0.2
+  provider: ^6.1.4
 
 dev_dependencies:
   flutter_test:
