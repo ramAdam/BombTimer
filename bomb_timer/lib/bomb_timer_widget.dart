@@ -1,6 +1,7 @@
 // bomb_timer_widget.dart
 import 'package:bomb_timer/widgets/hot_key_row_widget.dart';
 import 'package:bomb_timer/widgets/timer_settings_widget.dart';
+import 'package:bomb_timer/widgets/todo_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gif_view/gif_view.dart';
@@ -33,6 +34,11 @@ class BombTimer extends StatelessWidget {
       return true;
     } else if (key == LogicalKeyboardKey.keyH) {
       showHotkeysDialog(context);
+      return true;
+    } else if (key == LogicalKeyboardKey.keyT) {
+      _showAddTodoDialog(context);
+    } else if (key == LogicalKeyboardKey.keyL) {
+      controller.toggleTodoVisibility();
       return true;
     }
     return false;
@@ -78,6 +84,8 @@ class BombTimer extends StatelessWidget {
             HotkeyRow(keyName: '1', action: 'Set 60 Minutes'),
             HotkeyRow(keyName: '2', action: 'Set 20 Minutes'),
             HotkeyRow(keyName: '3', action: 'Set 30 Seconds'),
+            HotkeyRow(keyName: 'T', action: 'Add task'),
+            HotkeyRow(keyName: 'L', action: "Toggle Task visiblity"),
             HotkeyRow(keyName: 'H', action: 'Show Help'),
           ],
         ),
@@ -206,6 +214,20 @@ class BombTimer extends StatelessWidget {
                           ),
                         ),
 
+                      // Add Todo List
+                      if (controller.showTodoList)
+                        Positioned(
+                          left: 20, // Position on left side away from timer
+                          top: 120, // Below settings button
+                          child: SizedBox(
+                            height:
+                                400, // Fixed height with scrolling for many items
+                            child: SingleChildScrollView(
+                              child: const TodoList(),
+                            ),
+                          ),
+                        ),
+
                       // Reset button when game is over
                       if (controller.gameOver)
                         Positioned(
@@ -238,6 +260,30 @@ class BombTimer extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showAddTodoDialog(BuildContext context) {
+    final controller = Provider.of<BombTimerController>(context, listen: false);
+    final textController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('ADD TASK'),
+        content: TextField(controller: textController),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (textController.text.isNotEmpty) {
+                controller.addTodo(textController.text);
+                Navigator.pop(context);
+              }
+            },
+            child: Text('ADD'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 // bomb_timer_controller.dart
+import 'package:bomb_timer/model/todo_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -14,17 +15,24 @@ class BombTimerController extends ChangeNotifier {
   bool gameOver = false;
   int flashCount = 0;
 
+  // Todo list variables
+  final List<Todo> _todos = [];
+  bool _showTodoList = false;
+
   // Private implementation details
   Timer? _timer;
   Timer? _flashTimer;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  // Get formatted timer text
+  // Getters
   String get timerText {
     String minutesStr = minutes < 10 ? '0$minutes' : '$minutes';
     String secondsStr = seconds < 10 ? '0$seconds' : '$seconds';
     return '$minutesStr:$secondsStr';
   }
+
+  List<Todo> get todos => List.unmodifiable(_todos);
+  bool get showTodoList => _showTodoList;
 
   // Start the timer countdown
   void startTimer() {
@@ -121,6 +129,25 @@ class BombTimerController extends ChangeNotifier {
   void setChristmasTheme(bool enabled) {
     todayIsChristmas = enabled;
     notifyListeners(); // Replace onStateChanged with notifyListeners
+  }
+
+  // Todo list methods
+  void addTodo(String text) {
+    _todos.add(Todo(text: text));
+    notifyListeners();
+  }
+
+  void toggleTodoStatus(String id) {
+    final todoIndex = _todos.indexWhere((todo) => todo.id == id);
+    if (todoIndex != -1) {
+      _todos[todoIndex].isDone = !_todos[todoIndex].isDone;
+      notifyListeners();
+    }
+  }
+
+  void toggleTodoVisibility() {
+    _showTodoList = !_showTodoList;
+    notifyListeners();
   }
 
   // Play audio helper
