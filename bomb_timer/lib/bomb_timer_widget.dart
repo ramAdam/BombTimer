@@ -10,13 +10,31 @@ import 'bomb_timer_controller.dart';
 class BombTimer extends StatelessWidget {
   const BombTimer({super.key});
 
-  @visibleForTesting
-  bool handleKeyEvent(LogicalKeyboardKey key, BombTimerController controller) {
+  // Internal helper to keep key handling logic separated and testable
+  bool _handleKeyEvent(LogicalKeyboardKey key, BombTimerController controller,
+      BuildContext context) {
     if (key == LogicalKeyboardKey.keyR) {
       controller.resetGame();
       return true;
+    } else if (key == LogicalKeyboardKey.space) {
+      controller.startTimer();
+      return true;
+    } else if (key == LogicalKeyboardKey.digit1 ||
+        key == LogicalKeyboardKey.numpad1) {
+      controller.setTimerPreset(60, 0);
+      return true;
+    } else if (key == LogicalKeyboardKey.digit2 ||
+        key == LogicalKeyboardKey.numpad2) {
+      controller.setTimerPreset(20, 0);
+      return true;
+    } else if (key == LogicalKeyboardKey.digit3 ||
+        key == LogicalKeyboardKey.numpad3) {
+      controller.setTimerPreset(0, 30);
+      return true;
+    } else if (key == LogicalKeyboardKey.keyH) {
+      showHotkeysDialog(context);
+      return true;
     }
-    // other key handling
     return false;
   }
 
@@ -78,34 +96,16 @@ class BombTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create the controller here
     return Consumer<BombTimerController>(
       builder: (context, controller, child) {
         return Scaffold(
           backgroundColor: const Color(0xFF282828),
           body: Focus(
+            key: const Key('bombTimerFocus'),
             autofocus: true,
             onKeyEvent: (node, event) {
               if (event is KeyDownEvent) {
-                if (handleKeyEvent(event.logicalKey, controller)) {
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.space) {
-                  controller.startTimer();
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.digit1 ||
-                    event.logicalKey == LogicalKeyboardKey.numpad1) {
-                  controller.setTimerPreset(60, 0);
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.digit2 ||
-                    event.logicalKey == LogicalKeyboardKey.numpad2) {
-                  controller.setTimerPreset(20, 0);
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.digit3 ||
-                    event.logicalKey == LogicalKeyboardKey.numpad3) {
-                  controller.setTimerPreset(0, 30);
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
-                  showHotkeysDialog(context);
+                if (_handleKeyEvent(event.logicalKey, controller, context)) {
                   return KeyEventResult.handled;
                 }
               }

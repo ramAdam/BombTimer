@@ -57,11 +57,28 @@ void main() {
   testWidgets('Handles R key press', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    final bombTimerWidget = tester.widget<BombTimer>(find.byType(BombTimer));
-    final handled =
-        bombTimerWidget.handleKeyEvent(LogicalKeyboardKey.keyR, controller);
+    // Find the Focus widget
+    final focusFinder = find.byKey(const Key('bombTimerFocus'));
+    expect(focusFinder, findsOneWidget);
 
-    expect(handled, isTrue);
+    // Get the Focus widget
+    final Focus focusWidget = tester.widget<Focus>(focusFinder);
+    expect(focusWidget.onKeyEvent, isNotNull);
+
+    // Manually trigger the key event handler
+    final keyEvent = KeyDownEvent(
+      physicalKey: PhysicalKeyboardKey.keyR,
+      logicalKey: LogicalKeyboardKey.keyR,
+      timeStamp: Duration.zero, // Required parameter
+    );
+
+    // Call the handler directly
+    final result = focusWidget.onKeyEvent!(FocusNode(), keyEvent);
+
+    // Expect the key was handled
+    expect(result, equals(KeyEventResult.handled));
+
+    // Verify resetGame was called
     verify(() => controller.resetGame()).called(1);
   });
 }
