@@ -10,6 +10,16 @@ import 'bomb_timer_controller.dart';
 class BombTimer extends StatelessWidget {
   const BombTimer({super.key});
 
+  @visibleForTesting
+  bool handleKeyEvent(LogicalKeyboardKey key, BombTimerController controller) {
+    if (key == LogicalKeyboardKey.keyR) {
+      controller.resetGame();
+      return true;
+    }
+    // other key handling
+    return false;
+  }
+
   void showSettings(BuildContext context, BombTimerController controller) {
     showDialog(
       context: context,
@@ -69,169 +79,165 @@ class BombTimer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Create the controller here
-    return ChangeNotifierProvider(
-      create: (context) => BombTimerController(),
-      child: Consumer<BombTimerController>(
-        builder: (context, controller, child) {
-          return Scaffold(
-            backgroundColor: const Color(0xFF282828),
-            body: Focus(
-              autofocus: true,
-              onKeyEvent: (node, event) {
-                if (event is KeyDownEvent) {
-                  if (event.logicalKey == LogicalKeyboardKey.keyR) {
-                    controller.resetGame();
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.space) {
-                    controller.startTimer();
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.digit1 ||
-                      event.logicalKey == LogicalKeyboardKey.numpad1) {
-                    controller.setTimerPreset(60, 0);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.digit2 ||
-                      event.logicalKey == LogicalKeyboardKey.numpad2) {
-                    controller.setTimerPreset(20, 0);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.digit3 ||
-                      event.logicalKey == LogicalKeyboardKey.numpad3) {
-                    controller.setTimerPreset(0, 30);
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
-                    showHotkeysDialog(context);
-                    return KeyEventResult.handled;
-                  }
+    return Consumer<BombTimerController>(
+      builder: (context, controller, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFF282828),
+          body: Focus(
+            autofocus: true,
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent) {
+                if (handleKeyEvent(event.logicalKey, controller)) {
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.space) {
+                  controller.startTimer();
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.digit1 ||
+                    event.logicalKey == LogicalKeyboardKey.numpad1) {
+                  controller.setTimerPreset(60, 0);
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.digit2 ||
+                    event.logicalKey == LogicalKeyboardKey.numpad2) {
+                  controller.setTimerPreset(20, 0);
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.digit3 ||
+                    event.logicalKey == LogicalKeyboardKey.numpad3) {
+                  controller.setTimerPreset(0, 30);
+                  return KeyEventResult.handled;
+                } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
+                  showHotkeysDialog(context);
+                  return KeyEventResult.handled;
                 }
-                return KeyEventResult.ignored;
-              },
-              child: Center(
-                child: SizedBox(
-                  width: 1920,
-                  height: 1080,
-                  child: GestureDetector(
-                    onTap: () => controller.gameOver
-                        ? controller.resetGame()
-                        : controller.startTimer(),
-                    child: Stack(
-                      children: [
-                        // Bomb image
-                        if (!controller.gameOver)
-                          Positioned(
-                            right: 20,
-                            top: 20,
-                            child: Image.asset(
-                              controller.todayIsChristmas
-                                  ? 'assets/images/bomb_christmas.png'
-                                  : 'assets/images/bomb.png',
-                              width: 380,
-                            ),
+              }
+              return KeyEventResult.ignored;
+            },
+            child: Center(
+              child: SizedBox(
+                width: 1920,
+                height: 1080,
+                child: GestureDetector(
+                  key: const Key('bombTimerGestureDetector'),
+                  onTap: () => controller.gameOver
+                      ? controller.resetGame()
+                      : controller.startTimer(),
+                  child: Stack(
+                    children: [
+                      // Bomb image
+                      if (!controller.gameOver)
+                        Positioned(
+                          right: 20,
+                          top: 20,
+                          child: Image.asset(
+                            controller.todayIsChristmas
+                                ? 'assets/images/bomb_christmas.png'
+                                : 'assets/images/bomb.png',
+                            width: 380,
                           ),
+                        ),
 
-                        // Explosion GIF
-                        if (controller.gameOver)
-                          Positioned.fill(
-                            child: Center(
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.center,
-                                child: GifView.asset(
-                                  'assets/images/explosion2.gif',
-                                  key: controller.explosionGifKey,
-                                  width: 2400,
-                                  height: 2400,
-                                  fit: BoxFit.contain,
-                                  loop: false,
-                                  frameRate: 24,
-                                  onFinish: () {
-                                    print("Explosion animation completed");
-                                  },
-                                ),
+                      // Explosion GIF
+                      if (controller.gameOver)
+                        Positioned.fill(
+                          child: Center(
+                            child: Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              alignment: Alignment.center,
+                              child: GifView.asset(
+                                'assets/images/explosion2.gif',
+                                key: controller.explosionGifKey,
+                                width: 2400,
+                                height: 2400,
+                                fit: BoxFit.contain,
+                                loop: false,
+                                frameRate: 24,
+                                onFinish: () {
+                                  print("Explosion animation completed");
+                                },
                               ),
                             ),
                           ),
+                        ),
 
-                        // Timer display
-                        if (!controller.gameOver) ...[
+                      // Timer display
+                      if (!controller.gameOver) ...[
+                        Positioned(
+                          right: 170,
+                          top: 120,
+                          child: Text(
+                            '00:00',
+                            style: TextStyle(
+                              fontFamily: 'digital_7_mono',
+                              fontSize: 40,
+                              color: Colors.red.withOpacity(0.2),
+                            ),
+                          ),
+                        ),
+                        if (controller.showTimer)
                           Positioned(
                             right: 170,
                             top: 120,
                             child: Text(
-                              '00:00',
-                              style: TextStyle(
+                              controller.timerText,
+                              style: const TextStyle(
                                 fontFamily: 'digital_7_mono',
                                 fontSize: 40,
-                                color: Colors.red.withOpacity(0.2),
-                              ),
-                            ),
-                          ),
-                          if (controller.showTimer)
-                            Positioned(
-                              right: 170,
-                              top: 120,
-                              child: Text(
-                                controller.timerText,
-                                style: const TextStyle(
-                                  fontFamily: 'digital_7_mono',
-                                  fontSize: 40,
-                                  color: Colors.red,
-                                  shadows: [
-                                    Shadow(color: Colors.red, blurRadius: 2),
-                                  ],
-                                ),
-                              ),
-                            ),
-                        ],
-
-                        // Settings button
-                        if (!controller.gameOver)
-                          Positioned(
-                            top: 20,
-                            right: 0,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.settings,
                                 color: Colors.red,
-                                size: 40,
-                              ),
-                              onPressed: () =>
-                                  showSettings(context, controller),
-                            ),
-                          ),
-
-                        // Reset button when game is over
-                        if (controller.gameOver)
-                          Positioned(
-                            bottom: 50,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: ElevatedButton(
-                                onPressed: controller.resetGame,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 30, vertical: 15),
-                                ),
-                                child: const Text(
-                                  'RESET BOMB',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                shadows: [
+                                  Shadow(color: Colors.red, blurRadius: 2),
+                                ],
                               ),
                             ),
                           ),
                       ],
-                    ),
+
+                      // Settings button
+                      if (!controller.gameOver)
+                        Positioned(
+                          top: 20,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.settings,
+                              color: Colors.red,
+                              size: 40,
+                            ),
+                            onPressed: () => showSettings(context, controller),
+                          ),
+                        ),
+
+                      // Reset button when game is over
+                      if (controller.gameOver)
+                        Positioned(
+                          bottom: 50,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: ElevatedButton(
+                              onPressed: controller.resetGame,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 30, vertical: 15),
+                              ),
+                              child: const Text(
+                                'RESET BOMB',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
