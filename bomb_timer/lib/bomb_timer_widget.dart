@@ -1,4 +1,5 @@
 // bomb_timer_widget.dart
+import 'package:bomb_timer/widgets/hot_key_row_widget.dart';
 import 'package:bomb_timer/widgets/timer_settings_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,43 @@ class BombTimer extends StatelessWidget {
             controller.setChristmasTheme(christmas);
           },
         ),
+      ),
+    );
+  }
+
+  void showHotkeysDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'HOTKEYS',
+          style: TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Colors.grey[900],
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            HotkeyRow(keyName: 'SPACE', action: 'Start Timer'),
+            HotkeyRow(keyName: 'R', action: 'Reset Timer'),
+            HotkeyRow(keyName: '1', action: 'Set 60 Minutes'),
+            HotkeyRow(keyName: '2', action: 'Set 20 Minutes'),
+            HotkeyRow(keyName: '3', action: 'Set 30 Seconds'),
+            HotkeyRow(keyName: 'H', action: 'Show Help'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'CLOSE',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -58,6 +96,9 @@ class BombTimer extends StatelessWidget {
                   } else if (event.logicalKey == LogicalKeyboardKey.digit3 ||
                       event.logicalKey == LogicalKeyboardKey.numpad3) {
                     controller.setTimerPreset(0, 30);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
+                    showHotkeysDialog(context);
                     return KeyEventResult.handled;
                   }
                 }
