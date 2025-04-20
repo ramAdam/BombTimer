@@ -13,6 +13,7 @@ class BombTimerController extends ChangeNotifier {
   bool todayIsChristmas = true;
   bool showTimer = true;
   bool gameOver = false;
+  bool _isRunning = false;
   int flashCount = 0;
 
   // Todo list variables
@@ -25,6 +26,7 @@ class BombTimerController extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   // Getters
+  bool get isRunning => _isRunning;
   String get timerText {
     String minutesStr = minutes < 10 ? '0$minutes' : '$minutes';
     String secondsStr = seconds < 10 ? '0$seconds' : '$seconds';
@@ -36,7 +38,10 @@ class BombTimerController extends ChangeNotifier {
 
   // Start the timer countdown
   void startTimer() {
+    if (_isRunning) return;
+
     flashCount = 3;
+    _isRunning = true;
     _timer?.cancel();
     _flashTimer?.cancel();
 
@@ -46,11 +51,12 @@ class BombTimerController extends ChangeNotifier {
         const Duration(milliseconds: 50), (_) => _flashTimerDisplay());
 
     _playAudio('armbomb.wav');
-    notifyListeners(); // Replace onStateChanged with notifyListeners
+    notifyListeners();
   }
 
   // Reset the game to initial state
   void resetGame() {
+    _isRunning = false;
     _timer?.cancel();
     _flashTimer?.cancel();
 
@@ -61,7 +67,7 @@ class BombTimerController extends ChangeNotifier {
     flashCount = 0;
     explosionGifKey = UniqueKey();
 
-    _playAudio('armbomb.wav');
+    _playAudio('beep.wav');
     notifyListeners(); // Replace onStateChanged with notifyListeners
   }
 
