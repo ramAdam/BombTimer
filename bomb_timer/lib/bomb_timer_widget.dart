@@ -1,4 +1,5 @@
 // bomb_timer_widget.dart
+import 'package:bomb_timer/utils/dialogs.dart';
 import 'package:bomb_timer/widgets/hot_key_row_widget.dart';
 import 'package:bomb_timer/widgets/timer_settings_widget.dart';
 import 'package:bomb_timer/widgets/todo_list_widget.dart';
@@ -36,7 +37,9 @@ class BombTimer extends StatelessWidget {
       showHotkeysDialog(context);
       return true;
     } else if (key == LogicalKeyboardKey.keyT) {
-      _showAddTodoDialog(context);
+      TodoDialogs.showAddTodoDialog(
+          context, (text) => controller.addTodo(text));
+      return true;
     } else if (key == LogicalKeyboardKey.keyL) {
       controller.toggleTodoVisibility();
       return true;
@@ -260,30 +263,6 @@ class BombTimer extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  void _showAddTodoDialog(BuildContext context) {
-    final controller = Provider.of<BombTimerController>(context, listen: false);
-    final textController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('ADD TASK'),
-        content: TextField(controller: textController),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (textController.text.isNotEmpty) {
-                controller.addTodo(textController.text);
-                Navigator.pop(context);
-              }
-            },
-            child: Text('ADD'),
-          ),
-        ],
-      ),
     );
   }
 }

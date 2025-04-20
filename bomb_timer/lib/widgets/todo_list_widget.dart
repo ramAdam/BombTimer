@@ -1,5 +1,6 @@
 // widgets/todo_list_widget.dart
 import 'package:bomb_timer/bomb_timer_controller.dart';
+import 'package:bomb_timer/utils/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,31 +28,8 @@ class TodoList extends StatelessWidget {
             ),
           IconButton(
             icon: Icon(Icons.add, color: Colors.red),
-            onPressed: () => _showAddTodoDialog(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddTodoDialog(BuildContext context) {
-    final controller = Provider.of<BombTimerController>(context, listen: false);
-    final textController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('ADD TASK'),
-        content: TextField(controller: textController),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (textController.text.isNotEmpty) {
-                controller.addTodo(textController.text);
-                Navigator.pop(context);
-              }
-            },
-            child: Text('ADD'),
+            onPressed: () => TodoDialogs.showAddTodoDialog(
+                context, (text) => controller.addTodo(text)),
           ),
         ],
       ),
